@@ -79,6 +79,24 @@ public class FFProbeTests
     }
 
     [TestMethod]
+    public void PixelFormats_Sync()
+    {
+        var frameAnalysis = FFProbe.GetPixelFormats();
+
+        Assert.HasCount(267, frameAnalysis.PixelFormats);
+        Assert.IsTrue(frameAnalysis.PixelFormats.Any(f => f.Name == "yuv420p"));
+    }
+
+    [TestMethod]
+    public async Task PixelFormats_Async()
+    {
+        var frameAnalysis = await FFProbe.GetPixelFormatsAsync(cancellationToken: TestContext.CancellationToken);
+
+        Assert.HasCount(267, frameAnalysis.PixelFormats);
+        Assert.IsTrue(frameAnalysis.PixelFormats.Any(f => f.Name == "yuv420p"));
+    }
+
+    [TestMethod]
     [DataRow("0:00:03.008000", 0, 0, 0, 3, 8)]
     [DataRow("05:12:59.177", 0, 5, 12, 59, 177)]
     [DataRow("149:07:50.911750", 6, 5, 7, 50, 911)]
