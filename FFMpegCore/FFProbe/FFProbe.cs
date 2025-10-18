@@ -44,6 +44,15 @@ public static class FFProbe
         return ParsePacketsOutput(result);
     }
 
+    public static FFProbePixelFormats GetPixelFormats(FFOptions? ffOptions = null, string? customArguments = null)
+    {
+        var instance = PreparePixelFormatsAnalysisInstance(ffOptions ?? GlobalFFOptions.Current, customArguments);
+        var result = instance.StartAndWaitForExit();
+        ThrowIfExitCodeNotZero(result);
+
+        return ParsePixelFormatsOutput(result);
+    }
+
     public static IMediaAnalysis Analyse(Uri uri, FFOptions? ffOptions = null, string? customArguments = null)
     {
         var instance = PrepareStreamAnalysisInstance(uri.AbsoluteUri, ffOptions ?? GlobalFFOptions.Current, customArguments);
@@ -119,6 +128,16 @@ public static class FFProbe
         return ParsePacketsOutput(result);
     }
 
+    public static async Task<FFProbePixelFormats> GetPixelFormatsAsync(FFOptions? ffOptions = null, CancellationToken cancellationToken = default,
+        string? customArguments = null)
+    {
+        var instance = PreparePixelFormatsAnalysisInstance(ffOptions ?? GlobalFFOptions.Current, customArguments);
+        var result = await instance.StartAndWaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        ThrowIfExitCodeNotZero(result);
+
+        return ParsePixelFormatsOutput(result);
+    }
+
     public static async Task<IMediaAnalysis> AnalyseAsync(Uri uri, FFOptions? ffOptions = null, CancellationToken cancellationToken = default,
         string? customArguments = null)
     {
@@ -167,6 +186,17 @@ public static class FFProbe
         return ParseFramesOutput(result);
     }
 
+    public static bool TryGetPixelFormat(string name, out FFProbePixelFormat? format)
+    {
+        if (!GlobalFFOptions.Current.UseCache)
+        {
+            format = GetPixelFormats().PixelFormats.FirstOrDefault(x => x.Name.Equals(name, StringComparison.Ordinal));
+            return format != null;
+        }
+
+        return FFProbeCache.PixelFormats.TryGetValue(name, out format);
+    }
+
     private static IMediaAnalysis ParseOutput(IProcessResult instance)
     {
         var json = string.Join(string.Empty, instance.OutputData);
@@ -209,6 +239,19 @@ public static class FFProbe
         return ffprobeAnalysis!;
     }
 
+    private static FFProbePixelFormats ParsePixelFormatsOutput(IProcessResult instance)
+    {
+        var json = string.Join(string.Empty, instance.OutputData);
+        var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbePixelFormats>(json,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
+            });
+
+        return ffprobeAnalysis!;
+    }
+
     private static void ThrowIfInputFileDoesNotExist(string filePath)
     {
         if (!File.Exists(filePath))
@@ -240,6 +283,11 @@ public static class FFProbe
     private static ProcessArguments PreparePacketAnalysisInstance(string filePath, FFOptions ffOptions, string? customArguments)
     {
         return PrepareInstance($"-loglevel error -print_format json -show_packets -v quiet -sexagesimal \"{filePath}\"", ffOptions, customArguments);
+    }
+
+    private static ProcessArguments PreparePixelFormatsAnalysisInstance(FFOptions ffOptions, string? customArguments)
+    {
+        return PrepareInstance("-loglevel error -print_format json -show_pixel_formats", ffOptions, customArguments);
     }
 
     private static ProcessArguments PrepareInstance(string arguments, FFOptions ffOptions, string? customArguments)
