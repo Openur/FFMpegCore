@@ -153,7 +153,7 @@ public static class MediaAnalysisUtils
 
     public static double DivideRatio((double, double) ratio)
     {
-        return ratio.Item1 / ratio.Item2;
+        return ratio.Item2 == 0 ? 0 : ratio.Item1 / ratio.Item2;
     }
 
     public static (int, int) ParseRatioInt(string input, char separator)
