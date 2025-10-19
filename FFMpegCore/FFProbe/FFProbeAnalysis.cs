@@ -129,7 +129,7 @@ public class FFProbeStream : ITagsContainer
 
     [JsonInclude]
     [JsonPropertyName("side_data_list")]
-    public IReadOnlyList<IReadOnlyDictionary<string, JsonValue>>? SideData { get; internal set; }
+    public IReadOnlyList<IReadOnlyDictionary<string, JsonNode>>? SideData { get; internal set; }
 
     [JsonInclude]
     [JsonPropertyName("color_range")]
