@@ -1,4 +1,5 @@
-﻿using FFMpegCore.Enums;
+﻿using System.Text.Json.Nodes;
+using FFMpegCore.Enums;
 
 namespace FFMpegCore;
 
@@ -20,6 +21,7 @@ public class VideoStream : MediaStream
     public string ColorSpace { get; set; } = null!;
     public string ColorTransfer { get; set; } = null!;
     public string ColorPrimaries { get; set; } = null!;
+    public List<Dictionary<string, JsonNode>> SideData { get; set; } = null!;
 
     public PixelFormat GetPixelFormatInfo()
     {
