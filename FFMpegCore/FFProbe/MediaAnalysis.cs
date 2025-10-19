@@ -98,7 +98,8 @@ internal class MediaAnalysis : IMediaAnalysis
             Language = stream.GetLanguage(),
             Disposition = MediaAnalysisUtils.FormatDisposition(stream.Disposition),
             Tags = stream.Tags.ToCaseInsensitive(),
-            BitDepth = GetBitDepth(stream)
+            BitDepth = GetBitDepth(stream),
+            SideData = stream.SideData
         };
     }
 
