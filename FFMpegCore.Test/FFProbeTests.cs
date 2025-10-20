@@ -228,6 +228,14 @@ public class FFProbeTests
 
     [TestMethod]
     [Timeout(10000, CooperativeCancellation = true)]
+    public void Probe_Interlaced()
+    {
+        var info = FFProbe.Analyse(TestResources.Interlaced);
+        Assert.AreEqual("tt", info.PrimaryVideoStream!.FieldOrder);
+    }
+
+    [TestMethod]
+    [Timeout(10000, CooperativeCancellation = true)]
     public async Task Probe_Success_Subtitle_Async()
     {
         var info = await FFProbe.AnalyseAsync(TestResources.SrtSubtitle, cancellationToken: TestContext.CancellationToken);

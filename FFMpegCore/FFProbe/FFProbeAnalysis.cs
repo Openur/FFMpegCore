@@ -77,6 +77,8 @@ public class FFProbeStream : ITagsContainer, IDispositionContainer
 
     [JsonPropertyName("color_primaries")] public string ColorPrimaries { get; set; } = null!;
 
+    [JsonPropertyName("field_order")] public string FieldOrder { get; set; } = null!;
+
     [JsonPropertyName("disposition")] public Dictionary<string, int> Disposition { get; set; } = null!;
 
     [JsonPropertyName("tags")] public Dictionary<string, string>? Tags { get; set; }
