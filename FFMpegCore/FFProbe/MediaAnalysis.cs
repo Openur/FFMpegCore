@@ -71,7 +71,7 @@ internal class MediaAnalysis : IMediaAnalysis
         return new VideoStream
         {
             Index = stream.Index,
-            AvgFrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDouble(stream.AvgFrameRate, '/')),
+            AvgFrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDecimal(stream.AvgFrameRate, '/')),
             BitRate = !string.IsNullOrEmpty(stream.BitRate) ? MediaAnalysisUtils.ParseLongInvariant(stream.BitRate) : default,
             BitsPerRawSample = !string.IsNullOrEmpty(stream.BitsPerRawSample) ? MediaAnalysisUtils.ParseIntInvariant(stream.BitsPerRawSample) : default,
             CodecName = stream.CodecName,
@@ -82,7 +82,7 @@ internal class MediaAnalysis : IMediaAnalysis
             SampleAspectRatio = MediaAnalysisUtils.ParseRatioInt(stream.SampleAspectRatio, ':'),
             Duration = MediaAnalysisUtils.ParseDuration(stream.Duration),
             StartTime = MediaAnalysisUtils.ParseDuration(stream.StartTime),
-            FrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDouble(stream.FrameRate, '/')),
+            FrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDecimal(stream.FrameRate, '/')),
             Height = stream.Height ?? 0,
             Width = stream.Width ?? 0,
             Profile = stream.Profile,
