@@ -94,6 +94,7 @@ internal class MediaAnalysis : IMediaAnalysis
             ColorSpace = stream.ColorSpace,
             ColorTransfer = stream.ColorTransfer,
             ColorPrimaries = stream.ColorPrimaries,
+            FieldOrder = stream.FieldOrder,
             Rotation = MediaAnalysisUtils.ParseRotation(stream),
             Language = stream.GetLanguage(),
             Disposition = MediaAnalysisUtils.FormatDisposition(stream.Disposition),
