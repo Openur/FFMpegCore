@@ -73,7 +73,7 @@ internal class MediaAnalysis : IMediaAnalysis
         return new VideoStream
         {
             Index = stream.Index,
-            AvgFrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDouble(stream.AvgFrameRate, '/')),
+            AvgFrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDecimal(stream.AvgFrameRate, '/')),
             BitRate = !string.IsNullOrEmpty(stream.BitRate) ? MediaAnalysisUtils.ParseLongInvariant(stream.BitRate) : default,
             BitsPerRawSample = !string.IsNullOrEmpty(stream.BitsPerRawSample) ? MediaAnalysisUtils.ParseIntInvariant(stream.BitsPerRawSample) : default,
             CodecName = stream.CodecName,
@@ -84,7 +84,7 @@ internal class MediaAnalysis : IMediaAnalysis
             SampleAspectRatio = MediaAnalysisUtils.ParseRatioInt(stream.SampleAspectRatio, ':'),
             Duration = MediaAnalysisUtils.ParseDuration(stream.Duration),
             StartTime = MediaAnalysisUtils.ParseDuration(stream.StartTime),
-            FrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDouble(stream.FrameRate, '/')),
+            FrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDecimal(stream.FrameRate, '/')),
             Height = stream.Height ?? 0,
             Width = stream.Width ?? 0,
             Profile = stream.Profile,
@@ -152,7 +152,7 @@ public static class MediaAnalysisUtils
         return dictionary?.ToDictionary(tag => tag.Key, tag => tag.Value, StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, string>();
     }
 
-    public static double DivideRatio((double, double) ratio)
+    public static decimal DivideRatio((decimal, decimal) ratio)
     {
         return ratio.Item2 == 0 ? 0 : ratio.Item1 / ratio.Item2;
     }
@@ -168,7 +168,7 @@ public static class MediaAnalysisUtils
         return (ParseIntInvariant(ratio[0]), ParseIntInvariant(ratio[1]));
     }
 
-    public static (double, double) ParseRatioDouble(string input, char separator)
+    public static (decimal, decimal) ParseRatioDecimal(string input, char separator)
     {
         if (string.IsNullOrEmpty(input))
         {
@@ -176,12 +176,12 @@ public static class MediaAnalysisUtils
         }
 
         var ratio = input.Split(separator);
-        return (ratio.Length > 0 ? ParseDoubleInvariant(ratio[0]) : 0, ratio.Length > 1 ? ParseDoubleInvariant(ratio[1]) : 0);
+        return (ratio.Length > 0 ? ParseDecimalInvariant(ratio[0]) : 0, ratio.Length > 1 ? ParseDecimalInvariant(ratio[1]) : 0);
     }
 
-    public static double ParseDoubleInvariant(string line)
+    public static decimal ParseDecimalInvariant(string line)
     {
-        return double.Parse(line, NumberStyles.Any, CultureInfo.InvariantCulture);
+        return decimal.Parse(line, NumberStyles.Any, CultureInfo.InvariantCulture);
     }
 
     public static int ParseIntInvariant(string line)
