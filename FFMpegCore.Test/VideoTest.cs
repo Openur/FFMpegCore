@@ -1052,7 +1052,7 @@ public class VideoTest
     {
         using var outputFile = new TemporaryFile("out.mp4");
 
-        var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.CancellationToken);
 
         var task = FFMpegArguments
             .FromFileInput("testsrc2=size=320x240[out0]; sine[out1]", false, args => args
@@ -1063,7 +1063,6 @@ public class VideoTest
                 .WithVideoCodec(VideoCodec.LibX264)
                 .WithSpeedPreset(Speed.VeryFast))
             .CancellableThrough(cts.Token)
-            .CancellableThrough(TestContext.CancellationToken)
             .ProcessAsynchronously(false);
 
         cts.CancelAfter(300);
@@ -1079,7 +1078,7 @@ public class VideoTest
     {
         using var outputFile = new TemporaryFile("out.mp4");
 
-        var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.CancellationToken);
 
         var task = FFMpegArguments
             .FromFileInput("testsrc2=size=320x240[out0]; sine[out1]", false, args => args
@@ -1090,7 +1089,6 @@ public class VideoTest
                 .WithVideoCodec(VideoCodec.LibX264)
                 .WithSpeedPreset(Speed.VeryFast))
             .CancellableThrough(cts.Token)
-            .CancellableThrough(TestContext.CancellationToken)
             .ProcessAsynchronously();
 
         cts.CancelAfter(300);
@@ -1104,7 +1102,7 @@ public class VideoTest
     {
         using var outputFile = new TemporaryFile("out.mp4");
 
-        var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.CancellationToken);
 
         var task = FFMpegArguments
             .FromFileInput("testsrc2=size=320x240[out0]; sine[out1]", false, args => args
@@ -1128,7 +1126,7 @@ public class VideoTest
     {
         using var outputFile = new TemporaryFile("out.mp4");
 
-        var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.CancellationToken);
 
         cts.Cancel();
         var task = FFMpegArguments
@@ -1151,7 +1149,7 @@ public class VideoTest
     {
         using var outputFile = new TemporaryFile("out.mp4");
 
-        var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.CancellationToken);
 
         var task = FFMpegArguments
             .FromFileInput("testsrc2=size=320x240[out0]; sine[out1]", false, args => args
