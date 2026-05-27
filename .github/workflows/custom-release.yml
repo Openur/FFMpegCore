@@ -1,0 +1,164 @@
+name: NuGet custom release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release-openur
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name == 'workflow_dispatch' }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      package_version: ${{ steps.variables.outputs.package_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install xmllint
+        run: |
+          sudo apt update
+          sudo apt install --yes --no-install-suggests --no-install-recommends libxml2-utils
+
+      - name: Setup variables
+        id: variables
+        shell: bash
+        run: |
+          PACKAGE_VERSION=$(xmllint --xpath '/*[local-name()="Project"]/*[local-name()="PropertyGroup"]/*[local-name()="PackageVersion"]/text()' FFMpegCore/FFMpegCore.csproj)
+
+          echo "package_version=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Setup FFmpeg
+        uses: AnimMouse/setup-ffmpeg@178e0b4a408f06ce40d896c3cd79f50fa6f8b0c3 # v1.2.5
+        with:
+          version: '8.1'
+          token: ${{ github.token }}
+
+      - name: Test with dotnet
+        run: >-
+          dotnet test FFMpegCore.sln 
+          --collect "XPlat Code Coverage" 
+          --logger GitHubActions 
+
+  package:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Build solution
+      env:
+        OWNER: ${{ github.repository_owner }}
+        REPOSITORY: ${{ github.repository }}
+      run: >-
+        dotnet pack FFMpegCore/FFMpegCore.csproj 
+        -c Release 
+        -p:PackageId=${{ env.OWNER }}.FFMpegCore 
+        -p:PackageVersion=${{ needs.prepare.outputs.package_version }}.${{ github.run_number }}
+        -p:RepositoryUrl="https://github.com/${{ env.REPOSITORY }}"
+        -p:PackageProjectUrl="https://github.com/${{ env.REPOSITORY }}"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: packages
+        path: |
+          nupkg/*.nupkg
+          nupkg/*.snupkg
+        if-no-files-found: error
+
+  release:
+    needs:
+      - prepare
+      - package
+      - test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Download packages artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: packages
+          path: packages
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            packages/*.nupkg
+            packages/*.snupkg
+          artifactErrorsFailBuild: true
+          draft: false
+          generateReleaseNotes: false
+          skipIfReleaseExists: true
+          immutableCreate: true
+          name: v${{ needs.prepare.outputs.package_version }} (build ${{ github.run_number }})
+          tag: v${{ needs.prepare.outputs.package_version }}.${{ github.run_number }}
+
+  publish:
+    needs:
+      - package
+      - test
+      - release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Download packages artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: packages
+          path: packages
+
+      - name: Push to GitHub
+        shell: bash
+        run: >-
+          dotnet nuget push
+          packages/*.nupkg
+          --no-symbols
+          --skip-duplicate
+          --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+          --api-key ${{ secrets.GITHUB_TOKEN }}
+
+      - name: NuGet login
+        uses: nuget/login@v1.2.0
+        id: nuget-login
+        with:
+          user: Openur
+
+      - name: Push to NuGet
+        shell: bash
+        run: >-
+          dotnet nuget push
+          packages/*.nupkg
+          --skip-duplicate
+          --source https://api.nuget.org/v3/index.json
+          --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}"
