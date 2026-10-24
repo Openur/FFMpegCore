@@ -275,23 +275,23 @@ public static class FFProbe
 
     private static ProcessArguments PrepareStreamAnalysisInstance(string filePath, FFOptions ffOptions, string? customArguments)
     {
-        return PrepareInstance($"-loglevel error -print_format json -show_format -sexagesimal -show_streams -show_chapters \"{filePath}\"", ffOptions,
+        return PrepareInstance($"-loglevel error -print_format json=compact=1 -show_format -sexagesimal -show_streams -show_chapters \"{filePath}\"", ffOptions,
             customArguments);
     }
 
     private static ProcessArguments PrepareFrameAnalysisInstance(string filePath, FFOptions ffOptions, string? customArguments)
     {
-        return PrepareInstance($"-loglevel error -print_format json -show_frames -v quiet -sexagesimal \"{filePath}\"", ffOptions, customArguments);
+        return PrepareInstance($"-loglevel error -print_format json=compact=1 -show_frames -v quiet -sexagesimal \"{filePath}\"", ffOptions, customArguments);
     }
 
     private static ProcessArguments PreparePacketAnalysisInstance(string filePath, FFOptions ffOptions, string? customArguments)
     {
-        return PrepareInstance($"-loglevel error -print_format json -show_packets -v quiet -sexagesimal \"{filePath}\"", ffOptions, customArguments);
+        return PrepareInstance($"-loglevel error -print_format json=compact=1 -show_packets -v quiet -sexagesimal \"{filePath}\"", ffOptions, customArguments);
     }
 
     private static ProcessArguments PreparePixelFormatsAnalysisInstance(FFOptions ffOptions, string? customArguments)
     {
-        return PrepareInstance("-loglevel error -print_format json -show_pixel_formats", ffOptions, customArguments);
+        return PrepareInstance("-loglevel error -print_format json=compact=1 -show_pixel_formats", ffOptions, customArguments);
     }
 
     private static ProcessArguments PrepareInstance(string arguments, FFOptions ffOptions, string? customArguments)
