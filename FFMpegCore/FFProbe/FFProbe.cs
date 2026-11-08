@@ -11,6 +11,17 @@ namespace FFMpegCore;
 
 public static class FFProbe
 {
+    private static readonly JsonSerializerOptions _analysisSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    private static readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
+    };
+
     public static IMediaAnalysis Analyse(string filePath, FFOptions? ffOptions = null, string? customArguments = null)
     {
         return FromFile(filePath, ffOptions, customArguments, PrepareStreamAnalysisInstance, result => ParseOutput(result, filePath));
@@ -230,7 +241,7 @@ public static class FFProbe
 
     private static IMediaAnalysis ParseAnalysis(string json, string? path, IReadOnlyList<string> standardError)
     {
-        var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, _analysisSerializerOptions);
 
         if (ffprobeAnalysis?.Format == null)
         {
@@ -243,12 +254,7 @@ public static class FFProbe
     private static FFProbeFrames ParseFramesOutput(IProcessResult instance)
     {
         var json = string.Join(string.Empty, instance.OutputData);
-        var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeFrames>(json,
-            new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
-            });
+        var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeFrames>(json, _serializerOptions);
 
         return ffprobeAnalysis!;
     }
@@ -256,12 +262,7 @@ public static class FFProbe
     private static FFProbePackets ParsePacketsOutput(IProcessResult instance)
     {
         var json = string.Join(string.Empty, instance.OutputData);
-        var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbePackets>(json,
-            new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
-            });
+        var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbePackets>(json, _serializerOptions);
 
         return ffprobeAnalysis!;
     }
@@ -269,12 +270,7 @@ public static class FFProbe
     private static FFProbePixelFormats ParsePixelFormatsOutput(IProcessResult instance)
     {
         var json = string.Join(string.Empty, instance.OutputData);
-        var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbePixelFormats>(json,
-            new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
-            });
+        var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbePixelFormats>(json, _serializerOptions);
 
         return ffprobeAnalysis!;
     }
